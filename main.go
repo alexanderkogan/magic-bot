@@ -25,9 +25,10 @@ func getTerminalWidth() int {
 }
 
 func Battlefield(width int) []string {
+	border := strings.Repeat("-", width)
 	return []string{
-		strings.Repeat("-", width),
+		border,
 		"",
-		strings.Repeat("-", width),
+		border,
 	}
 }
