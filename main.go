@@ -2,27 +2,36 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"github.com/alexanderkogan/magic-bot/tui"
+	"github.com/gdamore/tcell"
 )
 
 func main() {
-	width := getTerminalWidth()
-	bf := Battlefield(width)
-	commands := Commands(width)
-
-	fmt.Println(strings.Join(append(bf, commands...), "\n"))
+	quitMessage := make(chan struct{})
+	e := tui.Screen(
+		50,
+		func(key tcell.EventKey) {
+			switch handleCommands(key) {
+			case Quit:
+				close(quitMessage)
+			}
+		},
+		mainLoop,
+		quitMessage,
+	)
+	if e != nil {
+		fmt.Println(e)
+	}
 }
 
-func getTerminalWidth() int {
-	fd := int(os.Stdout.Fd())
-	width, _, err := terminal.GetSize(fd)
-	if err != nil {
-		panic(err)
-	}
-	return width
+func mainLoop(s tcell.Screen) {
+	s.Sync()
+	width, _ := s.Size()
+	bf := Battlefield(width)
+	commands := Commands(width)
+	fmt.Println(strings.Join(append(bf, commands...), "\n"))
 }
 
 func Battlefield(width int) []string {
@@ -64,4 +73,25 @@ func toLinesByWords(words []string, lineWidth int) []string {
 		lines = append(lines, line)
 	}
 	return lines
+}
+
+type Command int
+
+const (
+	Quit Command = iota
+	Nothing
+)
+
+func handleCommands(key tcell.EventKey) Command {
+	switch key.Key() {
+	case tcell.KeyRune:
+		switch key.Rune() {
+		case 'q':
+			return Quit
+		}
+	case tcell.KeyEscape, tcell.KeyEnter:
+		return Quit
+	}
+
+	return Nothing
 }
