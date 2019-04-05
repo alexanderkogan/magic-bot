@@ -11,8 +11,9 @@ import (
 func main() {
 	width := getTerminalWidth()
 	bf := Battlefield(width)
+	commands := Commands(width)
 
-	fmt.Println(strings.Join(bf, "\n"))
+	fmt.Println(strings.Join(append(bf, commands...), "\n"))
 }
 
 func getTerminalWidth() int {
@@ -31,4 +32,31 @@ func Battlefield(width int) []string {
 		"",
 		border,
 	}
+}
+
+func Commands(width int) []string {
+	cmds := []string{
+		"n: New Game",
+		"l: Lifepoints",
+		"q: Quit",
+	}
+	var lines []string
+	var line string
+	cmdDivider := " - "
+	for _, value := range cmds {
+		if len(line)+len(cmdDivider)+len(value) > width {
+			lines = append(lines, line)
+			line = value
+			continue
+		}
+		if line == "" {
+			line = value
+		} else {
+			line = line + cmdDivider + value
+		}
+	}
+	if line != "" {
+		lines = append(lines, line)
+	}
+	return lines
 }
