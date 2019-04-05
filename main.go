@@ -40,11 +40,16 @@ func Commands(width int) []string {
 		"l: Lifepoints",
 		"q: Quit",
 	}
+	lines := toLinesByWords(cmds, width)
+	return lines
+}
+
+func toLinesByWords(words []string, lineWidth int) []string {
 	var lines []string
 	var line string
 	cmdDivider := " - "
-	for _, value := range cmds {
-		if len(line)+len(cmdDivider)+len(value) > width {
+	for _, value := range words {
+		if len(line)+len(cmdDivider)+len(value) > lineWidth {
 			lines = append(lines, line)
 			line = value
 			continue
