@@ -31,7 +31,8 @@ func mainLoop(s tcell.Screen) {
 	width, _ := s.Size()
 	bf := Battlefield(width)
 	commands := Commands(width)
-	fmt.Println(strings.Join(append(bf, commands...), "\n"))
+	lines := append(bf, commands...)
+	fmt.Print(strings.Join(lines, "\r\n"))
 }
 
 func Battlefield(width int) []string {
