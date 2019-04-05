@@ -1,19 +1,9 @@
-package main
+package commands
 
 import (
 	"fmt"
 	"strings"
 )
-
-func ExampleEmptyBattlefield() {
-	width := 10
-	bf := Battlefield(width)
-	printToConsole(bf)
-
-	// Output: ----------
-	//
-	// ----------
-}
 
 func ExampleCommandsWrap() {
 	width := 30
