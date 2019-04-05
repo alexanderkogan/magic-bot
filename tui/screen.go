@@ -21,9 +21,7 @@ func Screen(speed int, keyHandler KeyHandler, mainLoop MainLoopHandler, quit <-c
 		return e
 	}
 
-	s.SetStyle(tcell.StyleDefault.
-		Foreground(tcell.ColorBlack).
-		Background(tcell.ColorWhite))
+	s.SetStyle(tcell.StyleDefault)
 	s.Clear()
 
 	go func() {
