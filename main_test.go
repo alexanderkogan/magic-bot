@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/alexanderkogan/magic-bot/backend"
 	"github.com/gdamore/tcell"
 )
 
@@ -23,7 +24,7 @@ func withTestScreen(t *testing.T, test func(tcell.SimulationScreen)) {
 func TestMainLoop(t *testing.T) {
 	t.Run("first screen", func(t *testing.T) {
 		withTestScreen(t, func(s tcell.SimulationScreen) {
-			mainLoop(s)
+			mainLoop(&backend.MockServer{})(s)
 
 			screenContent, width, height := s.GetContents()
 			for position1D, cell := range screenContent {
@@ -82,8 +83,9 @@ func position1DTo2D(pos, width int) (x int, y int) {
 func TestGetLines(t *testing.T) {
 	t.Run("lines should fill screen", func(t *testing.T) {
 		withTestScreen(t, func(s tcell.SimulationScreen) {
-			lines := getLines(s)
-			_, height := s.Size()
+			noBackend := backend.Battlefield{}
+			width, height := s.Size()
+			lines := getLines(noBackend, width, height)
 			if len(lines) < height {
 				t.Fatalf("Expected %d lines but got %d.", height, len(lines))
 			}
