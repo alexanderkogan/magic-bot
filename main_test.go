@@ -36,6 +36,22 @@ func TestMainLoop(t *testing.T) {
 			}
 		})
 	})
+
+	// TODO show names and life totals
+	t.Run("new game hacky", func(t *testing.T) {
+		withTestScreen(t, func(screen tcell.SimulationScreen) {
+			srv := &backend.MockServer{}
+			srv.NewGame(backend.NewGameRequest{})
+			mainLoop(srv)(screen)
+
+			screenContent, width, height := screen.GetContents()
+			for position1D, cell := range screenContent {
+				x, y := position1DTo2D(position1D, width)
+				requireOneRune(t, cell.Runes, x, y)
+				checkNewGameAlert(t, x, y, width, height, cell.Runes[0])
+			}
+		})
+	})
 }
 
 func requireOneRune(t *testing.T, runes []rune, x, y int) {
@@ -61,7 +77,7 @@ func checkLowerBorder(t *testing.T, x, y, height int, content rune) {
 }
 
 func checkCommandLine(t *testing.T, x, y, height int, content rune) {
-	var commandLineSnapshot = []rune("n: New Game - l: Lifepoints - q: Quit")
+	commandLineSnapshot := []rune("n: New Game - l: Lifepoints - q: Quit")
 
 	if y == height-1 {
 		restOfLine := x >= len(commandLineSnapshot)
@@ -70,6 +86,17 @@ func checkCommandLine(t *testing.T, x, y, height int, content rune) {
 		}
 		if restOfLine && content != ' ' {
 			t.Fatalf("Expected rest of command line to be empty, but got '%s' at (%d, %d).", string(content), x, y)
+		}
+	}
+}
+
+func checkNewGameAlert(t *testing.T, x, y, width, height int, content rune) {
+	newGameAlertSnapshot := []rune("New Game started")
+	indent := width/2 - len(newGameAlertSnapshot)/2
+
+	if y == height/2 && x >= indent && x < indent+len(newGameAlertSnapshot) {
+		if content != rune(newGameAlertSnapshot[x-indent]) {
+			t.Fatal(x, y, content)
 		}
 	}
 }

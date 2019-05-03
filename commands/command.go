@@ -37,8 +37,9 @@ func toLinesByWords(words []string, lineWidth int) []string {
 type Command int
 
 const (
-	Quit Command = iota
-	Nothing
+	Nothing Command = iota
+	NewGame
+	Quit
 )
 
 func Handle(key tcell.EventKey) Command {
@@ -47,6 +48,8 @@ func Handle(key tcell.EventKey) Command {
 		switch key.Rune() {
 		case 'q':
 			return Quit
+		case 'n':
+			return NewGame
 		}
 	case tcell.KeyEscape, tcell.KeyEnter:
 		return Quit
