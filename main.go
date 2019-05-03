@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/alexanderkogan/magic-bot/battlefield"
 	"github.com/alexanderkogan/magic-bot/commands"
@@ -30,9 +29,18 @@ func main() {
 
 func mainLoop(s tcell.Screen) {
 	s.Sync()
-	width, _ := s.Size()
-	bf := battlefield.Battlefield(width)
+	width, height := s.Size()
 	coms := commands.Commands(width)
+	bf := battlefield.Battlefield(width, height-len(coms))
 	lines := append(bf, coms...)
-	fmt.Print(strings.Join(lines, "\r\n"))
+	drawBattlefield(s, lines)
+}
+
+func drawBattlefield(s tcell.Screen, lines []string) {
+	var noCombiningRunes []rune
+	for y, lineToDraw := range lines {
+		for x, characterToDraw := range lineToDraw {
+			s.SetContent(x, y, characterToDraw, noCombiningRunes, tcell.StyleDefault)
+		}
+	}
 }

@@ -2,11 +2,11 @@ package battlefield
 
 import "strings"
 
-func Battlefield(width int) []string {
+func Battlefield(width, height int) []string {
 	border := strings.Repeat("-", width)
-	return []string{
-		border,
-		"",
-		border,
+	out := []string{border}
+	for line := 0; line < height-2; line++ {
+		out = append(out, "")
 	}
+	return append(out, border)
 }

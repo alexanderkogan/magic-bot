@@ -6,8 +6,8 @@ import (
 )
 
 func ExampleEmptyBattlefield() {
-	width := 10
-	bf := Battlefield(width)
+	width, height := 10, 3
+	bf := Battlefield(width, height)
 	printToConsole(bf)
 
 	// Output: ----------
