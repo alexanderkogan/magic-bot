@@ -61,7 +61,17 @@ func checkLowerBorder(t *testing.T, x, y, height int, content rune) {
 }
 
 func checkCommandLine(t *testing.T, x, y, height int, content rune) {
-	//TODO ???
+	var commandLineSnapshot = []rune("n: New Game - l: Lifepoints - q: Quit")
+
+	if y == height-1 {
+		restOfLine := x >= len(commandLineSnapshot)
+		if !restOfLine && content != rune(commandLineSnapshot[x]) {
+			t.Fatalf("Expected command line to be '%s' but got '%s' instead of '%s' at (%d, %d).", string(commandLineSnapshot), string(content), string(commandLineSnapshot[x]), x, y)
+		}
+		if restOfLine && content != ' ' {
+			t.Fatalf("Expected rest of command line to be empty, but got '%s' at (%d, %d).", string(content), x, y)
+		}
+	}
 }
 
 func position1DTo2D(pos, width int) (x int, y int) {
