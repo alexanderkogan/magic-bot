@@ -81,8 +81,12 @@ func TestNewGame(t *testing.T) {
 func TestBattlefieldState(t *testing.T) {
 	t.Run("keep created battlefield", func(t *testing.T) {
 		srv := MockServer{}
-		battlefield := srv.NewGame(NewGameRequest{})
-		battlefield = battlefield
-		// TODO
+		you := Player{Name: "Nahiri", LifeTotal: 21}
+		enemy := Player{Name: "Sorin", LifeTotal: 22}
+		expect := srv.NewGame(NewGameRequest{You: you, Enemy: enemy})
+		battlefield := srv.BattlefieldState()
+		if expect != battlefield {
+			t.Fatalf("Expected the battlefield to stay\n%#v\nbut got\n%#v", expect, battlefield)
+		}
 	})
 }

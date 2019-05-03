@@ -4,12 +4,14 @@ type MockServer struct {
 	battlefield Battlefield
 }
 
+var _ Server = (*MockServer)(nil)
+
 var defaultBattlefield = Battlefield{
 	You:   Player{Name: "Liliana Vess", LifeTotal: 20},
 	Enemy: Player{Name: "Chandra Nalaar", LifeTotal: 20},
 }
 
-func (srv MockServer) NewGame(init NewGameRequest) Battlefield {
+func (srv *MockServer) NewGame(init NewGameRequest) Battlefield {
 	srv.battlefield = defaultBattlefield
 	if init.You.Name != "" {
 		srv.battlefield.You.Name = init.You.Name
