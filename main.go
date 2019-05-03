@@ -44,10 +44,13 @@ func getLines(s tcell.Screen) []string {
 
 func drawScreen(s tcell.Screen, lines []string) {
 	var noCombiningRunes []rune
+
+	defer s.Show()
+	s.Clear()
+
 	for y, lineToDraw := range lines {
 		for x, characterToDraw := range lineToDraw {
 			s.SetContent(x, y, characterToDraw, noCombiningRunes, tcell.StyleDefault)
 		}
 	}
-	s.Show()
 }
