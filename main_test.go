@@ -25,7 +25,6 @@ func TestMainLoop(t *testing.T) {
 		withTestScreen(t, func(s tcell.SimulationScreen) {
 			mainLoop(s)
 
-			s.Show()
 			screenContent, width, height := s.GetContents()
 			for position1D, cell := range screenContent {
 				x, y := position1DTo2D(position1D, width)
@@ -78,4 +77,16 @@ func position1DTo2D(pos, width int) (x int, y int) {
 	x = pos % width
 	y = int(math.Floor(float64(pos) / float64(width)))
 	return
+}
+
+func TestGetLines(t *testing.T) {
+	t.Run("lines should fill screen", func(t *testing.T) {
+		withTestScreen(t, func(s tcell.SimulationScreen) {
+			lines := getLines(s)
+			_, height := s.Size()
+			if len(lines) < height {
+				t.Fatalf("Expected %d lines but got %d.", height, len(lines))
+			}
+		})
+	})
 }

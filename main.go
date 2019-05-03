@@ -29,18 +29,25 @@ func main() {
 
 func mainLoop(s tcell.Screen) {
 	s.Sync()
-	width, height := s.Size()
-	coms := commands.Commands(width)
-	bf := battlefield.Battlefield(width, height-len(coms))
-	lines := append(bf, coms...)
-	drawBattlefield(s, lines)
+	lines := getLines(s)
+	drawScreen(s, lines)
 }
 
-func drawBattlefield(s tcell.Screen, lines []string) {
+func getLines(s tcell.Screen) []string {
+	width, height := s.Size()
+	coms := commands.Commands(width)
+	return append(
+		battlefield.Battlefield(width, height-len(coms)),
+		coms...,
+	)
+}
+
+func drawScreen(s tcell.Screen, lines []string) {
 	var noCombiningRunes []rune
 	for y, lineToDraw := range lines {
 		for x, characterToDraw := range lineToDraw {
 			s.SetContent(x, y, characterToDraw, noCombiningRunes, tcell.StyleDefault)
 		}
 	}
+	s.Show()
 }
