@@ -12,7 +12,7 @@ type Battlefield struct {
 
 type Player struct {
 	Name      string
-	Lifetotal int
+	LifeTotal int
 	Library   DeckID
 }
 
