@@ -1,15 +1,16 @@
 package main
 
-import "github.com/alexanderkogan/magic-bot/backend"
-
-func addPlayerNames(field backend.Battlefield, lines []string) []string {
-	lines[0] = addNameOnLine(field.Enemy.Name, lines[0])
-	lines[len(lines)-1] = addNameOnLine(field.You.Name, lines[len(lines)-1])
+func addPlayerNames(youName, enemyName string, lines []string) []string {
+	if len(lines) < 2 {
+		return lines
+	}
+	lines[0] = addNameOnLine(enemyName, lines[0])
+	lines[len(lines)-1] = addNameOnLine(youName, lines[len(lines)-1])
 	return lines
 }
 
 func addNameOnLine(name string, line string) string {
-	if name != "" {
+	if name != "" && len(line) > 0 {
 		restOfLine := ""
 		nameFitsOnLine := 1+len(name) < len(line)
 		if nameFitsOnLine {

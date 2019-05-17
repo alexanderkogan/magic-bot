@@ -44,7 +44,7 @@ func mainLoop(srv backend.Server) func(tcell.Screen) {
 func getLines(field backend.Battlefield, width, height int) []string {
 	coms := commands.Commands(width)
 	battlefieldLines := battlefield.Battlefield(width, height-len(coms))
-	battlefieldLines = addPlayerNames(field, battlefieldLines)
+	battlefieldLines = addPlayerNames(field.You.Name, field.Enemy.Name, battlefieldLines)
 
 	battlefieldLines[len(battlefieldLines)/2] = newGameAlertWithIndent(field, width)
 
