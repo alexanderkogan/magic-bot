@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/alexanderkogan/magic-bot/backend"
 	"github.com/alexanderkogan/magic-bot/battlefield"
 	"github.com/alexanderkogan/magic-bot/commands"
 	"github.com/alexanderkogan/magic-bot/tui"
@@ -11,6 +12,7 @@ import (
 
 func main() {
 	quitMessage := make(chan struct{})
+	srv := &backend.MockServer{}
 	e := tui.Screen(
 		50,
 		func(key tcell.EventKey) {
@@ -19,7 +21,7 @@ func main() {
 				close(quitMessage)
 			}
 		},
-		mainLoop,
+		mainLoop(srv),
 		quitMessage,
 	)
 	if e != nil {
@@ -27,14 +29,16 @@ func main() {
 	}
 }
 
-func mainLoop(s tcell.Screen) {
-	s.Sync()
-	lines := getLines(s)
-	drawScreen(s, lines)
+func mainLoop(srv backend.Server) func(tcell.Screen) {
+	return func(s tcell.Screen) {
+		s.Sync()
+		width, height := s.Size()
+		lines := getLines(srv.BattlefieldState(), width, height)
+		drawScreen(s, lines)
+	}
 }
 
-func getLines(s tcell.Screen) []string {
-	width, height := s.Size()
+func getLines(field backend.Battlefield, width, height int) []string {
 	coms := commands.Commands(width)
 	return append(
 		battlefield.Battlefield(width, height-len(coms)),
