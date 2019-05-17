@@ -1,25 +1,12 @@
 package main
 
 import (
-	"math"
 	"strconv"
 	"testing"
 
 	"github.com/alexanderkogan/magic-bot/backend"
 	"github.com/gdamore/tcell"
 )
-
-func withTestScreen(t *testing.T, test func(tcell.SimulationScreen)) {
-	s := tcell.NewSimulationScreen("")
-	if s == nil {
-		t.Fatalf("Failed to get simulation screen")
-	}
-	defer s.Fini()
-	if e := s.Init(); e != nil {
-		t.Fatalf("Failed to initialize screen: %v", e)
-	}
-	test(s)
-}
 
 func TestMainLoop(t *testing.T) {
 	t.Run("first screen", func(t *testing.T) {
@@ -37,27 +24,31 @@ func TestMainLoop(t *testing.T) {
 		})
 	})
 
-	// TODO show names and life totals
+	// TODO show life totals
 	t.Run("new game hacky", func(t *testing.T) {
 		withTestScreen(t, func(screen tcell.SimulationScreen) {
 			srv := &backend.MockServer{}
 			srv.NewGame(backend.NewGameRequest{})
 			mainLoop(srv)(screen)
 
+			newGameAlertSnapshot := []rune("New Game started")
 			screenContent, width, height := screen.GetContents()
+			indent := width/2 - len(newGameAlertSnapshot)/2
+
 			for position1D, cell := range screenContent {
 				x, y := position1DTo2D(position1D, width)
 				requireOneRune(t, cell.Runes, x, y)
-				checkNewGameAlert(t, x, y, width, height, cell.Runes[0])
+
+				content := cell.Runes[0]
+				if y == height/2 && x >= indent && x < indent+len(newGameAlertSnapshot) {
+					if content != rune(newGameAlertSnapshot[x-indent]) {
+						t.Fatal(x, y, content)
+					}
+				}
 			}
 		})
 	})
-}
 
-func requireOneRune(t *testing.T, runes []rune, x, y int) {
-	if len(runes) > 1 {
-		t.Fatalf("Unexpected number of runes in %d, %d: %v", x, y, runes)
-	}
 }
 
 func checkUpperBorder(t *testing.T, x, y int, content rune) {
@@ -88,23 +79,6 @@ func checkCommandLine(t *testing.T, x, y, height int, content rune) {
 			t.Fatalf("Expected rest of command line to be empty, but got '%s' at (%d, %d).", string(content), x, y)
 		}
 	}
-}
-
-func checkNewGameAlert(t *testing.T, x, y, width, height int, content rune) {
-	newGameAlertSnapshot := []rune("New Game started")
-	indent := width/2 - len(newGameAlertSnapshot)/2
-
-	if y == height/2 && x >= indent && x < indent+len(newGameAlertSnapshot) {
-		if content != rune(newGameAlertSnapshot[x-indent]) {
-			t.Fatal(x, y, content)
-		}
-	}
-}
-
-func position1DTo2D(pos, width int) (x int, y int) {
-	x = pos % width
-	y = int(math.Floor(float64(pos) / float64(width)))
-	return
 }
 
 func TestGetLines(t *testing.T) {
