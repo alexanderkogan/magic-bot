@@ -90,3 +90,21 @@ func TestBattlefieldState(t *testing.T) {
 		}
 	})
 }
+
+func TestGameStarted(t *testing.T) {
+	t.Run("game not started on init", func(t *testing.T) {
+		srv := MockServer{}
+		if srv.GameStarted() {
+			t.Fatal("Expected the game to not be started on initialisation.")
+		}
+	})
+
+	t.Run("game started after NewGameRequest", func(t *testing.T) {
+		srv := MockServer{}
+		srv.NewGame(NewGameRequest{})
+
+		if !srv.GameStarted() {
+			t.Fatal("Expected the game to be started on NewGameRequest.")
+		}
+	})
+}

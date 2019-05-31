@@ -21,5 +21,7 @@ type DeckID string
 type Server interface {
 	NewGame(NewGameRequest) Battlefield
 
+	GameStarted() bool
+
 	BattlefieldState() Battlefield
 }
