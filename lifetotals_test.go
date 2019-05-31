@@ -85,20 +85,56 @@ func TestLifeTotalsOnScreen(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run("should show dead player", func(t *testing.T) {
+		withTestScreen(t, func(screen tcell.SimulationScreen) {
+			srv := &backend.MockServer{}
+			you, enemy := backend.Player{Name: "Alex"}, backend.Player{Name: "Niko"}
+			srv.NewGame(backend.NewGameRequest{You: you, Enemy: enemy})
+			srv.OverwritePlayerLifeTotal(0, -1)
+			mainLoop(srv)(screen)
+
+			screenContent, width, height := screen.GetContents()
+			youHeight, enemyHeight := height-2, 0
+			for position1D, cell := range screenContent {
+				x, y := position1DTo2D(position1D, width)
+				requireOneRune(t, cell.Runes, x, y)
+				checkLifeTotal(t, x, y, deadPlayer, youHeight, width, cell.Runes[0])
+				checkLifeTotal(t, x, y, deadPlayer, enemyHeight, width, cell.Runes[0])
+			}
+		})
+	})
 }
 
 func checkLifeTotal(t *testing.T, x, y int, lifeTotal string, expectedHeight, width int, content rune) {
-	startX := width - 1 - len(lifeTotal)
+	lifeTotalLen := getLifeLen(lifeTotal)
+	startX, endX := getStartEndForLife(width, lifeTotalLen)
 	if y == expectedHeight && x >= startX {
-		endX := startX + len(lifeTotal) - 1
 		placeOfLife := x >= startX && x <= endX
 		beforeLife := x >= startX-2 && x < startX
 		afterLife := x > endX+1
-		if placeOfLife && content != rune(lifeTotal[x-startX]) {
+
+		livingPlayerOK := lifeTotal != deadPlayer && content != rune(lifeTotal[x-startX])
+		deadPlayerOK := lifeTotal == deadPlayer && content != deadPlayerRune
+
+		if placeOfLife && livingPlayerOK && deadPlayerOK {
 			t.Errorf("Expected '%s' to be printed here, but got '%s' at (%d, %d).", lifeTotal, string(content), x, y)
 		}
 		if (beforeLife || afterLife) && content != '-' {
 			t.Fatalf("Expected line around the life total to be filled with '-' but got '%s' at (%d, %d).", string(content), x, y)
 		}
 	}
+}
+
+func getLifeLen(life string) int {
+	if life == deadPlayer {
+		return 1
+	}
+	return len(life)
+}
+
+func getStartEndForLife(width, lifeTotalLen int) (int, int) {
+	start := width - 1 - lifeTotalLen
+	end := start + lifeTotalLen - 1
+	return start, end
 }

@@ -1,6 +1,9 @@
 package main
 
-import "strconv"
+import (
+	"strconv"
+	"unicode/utf8"
+)
 
 func addLifeTotals(you, enemy int, lines []string) []string {
 	if len(lines) < 2 {
@@ -24,6 +27,8 @@ func addTotalOnLine(total int, line string) string {
 }
 
 const deadPlayer string = "☠"
+
+var deadPlayerRune, _ = utf8.DecodeRuneInString(deadPlayer)
 
 func handleDeadPlayer(line string) string {
 	// Since the deadPlayer placeholder has len 4, it needs to be handled differently.
