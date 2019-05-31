@@ -84,9 +84,9 @@ func checkCommandLine(t *testing.T, x, y, height int, content rune) {
 func TestGetLines(t *testing.T) {
 	t.Run("lines should fill screen", func(t *testing.T) {
 		withTestScreen(t, func(s tcell.SimulationScreen) {
-			noBackend := backend.Battlefield{}
+			noBackend := backend.MockServer{}
 			width, height := s.Size()
-			lines := getLines(noBackend, width, height)
+			lines := getLines(&noBackend, width, height)
 			if len(lines) < height {
 				t.Fatalf("Expected %d lines but got %d.", height, len(lines))
 			}

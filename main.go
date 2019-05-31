@@ -36,16 +36,19 @@ func mainLoop(srv backend.Server) func(tcell.Screen) {
 	return func(s tcell.Screen) {
 		s.Sync()
 		width, height := s.Size()
-		lines := getLines(srv.BattlefieldState(), width, height)
+		lines := getLines(srv, width, height)
 		drawScreen(s, lines)
 	}
 }
 
-func getLines(field backend.Battlefield, width, height int) []string {
+func getLines(srv backend.Server, width, height int) []string {
+	field := srv.BattlefieldState()
 	coms := commands.Commands(width)
 	battlefieldLines := battlefield.Battlefield(width, height-len(coms))
-	battlefieldLines = addPlayerNames(field.You.Name, field.Enemy.Name, battlefieldLines)
-
+	if srv.GameStarted() {
+		battlefieldLines = addPlayerNames(field.You.Name, field.Enemy.Name, battlefieldLines)
+		battlefieldLines = addLifeTotals(field.You.LifeTotal, field.Enemy.LifeTotal, battlefieldLines)
+	}
 	battlefieldLines[len(battlefieldLines)/2] = newGameAlertWithIndent(field, width)
 
 	return append(

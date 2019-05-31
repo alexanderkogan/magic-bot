@@ -3,6 +3,9 @@ package main
 import (
 	"strconv"
 	"testing"
+
+	"github.com/alexanderkogan/magic-bot/backend"
+	"github.com/gdamore/tcell"
 )
 
 func TestAddLifeTotals(t *testing.T) {
@@ -62,4 +65,40 @@ func TestAddLifeTotals(t *testing.T) {
 				"and rest of lines to be untouched, but got %#v\nExpected: %#v", got, expect)
 		}
 	})
+}
+
+func TestLifeTotalsOnScreen(t *testing.T) {
+	t.Run("should show life totals", func(t *testing.T) {
+		withTestScreen(t, func(screen tcell.SimulationScreen) {
+			srv := &backend.MockServer{}
+			you, enemy := backend.Player{Name: "Alex", LifeTotal: 9}, backend.Player{Name: "Niko", LifeTotal: 200}
+			srv.NewGame(backend.NewGameRequest{You: you, Enemy: enemy})
+			mainLoop(srv)(screen)
+
+			screenContent, width, height := screen.GetContents()
+			youHeight, enemyHeight := height-2, 0
+			for position1D, cell := range screenContent {
+				x, y := position1DTo2D(position1D, width)
+				requireOneRune(t, cell.Runes, x, y)
+				checkLifeTotal(t, x, y, strconv.Itoa(you.LifeTotal), youHeight, width, cell.Runes[0])
+				checkLifeTotal(t, x, y, strconv.Itoa(enemy.LifeTotal), enemyHeight, width, cell.Runes[0])
+			}
+		})
+	})
+}
+
+func checkLifeTotal(t *testing.T, x, y int, lifeTotal string, expectedHeight, width int, content rune) {
+	startX := width - 1 - len(lifeTotal)
+	if y == expectedHeight && x >= startX {
+		endX := startX + len(lifeTotal) - 1
+		placeOfLife := x >= startX && x <= endX
+		beforeLife := x >= startX-2 && x < startX
+		afterLife := x > endX+1
+		if placeOfLife && content != rune(lifeTotal[x-startX]) {
+			t.Errorf("Expected '%s' to be printed here, but got '%s' at (%d, %d).", lifeTotal, string(content), x, y)
+		}
+		if (beforeLife || afterLife) && content != '-' {
+			t.Fatalf("Expected line around the life total to be filled with '-' but got '%s' at (%d, %d).", string(content), x, y)
+		}
+	}
 }

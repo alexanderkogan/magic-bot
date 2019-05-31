@@ -108,12 +108,15 @@ func TestPlayerNamesOnScreen(t *testing.T) {
 func checkPlayerName(t *testing.T, x, y int, name string, expectedHeight int, content rune) {
 	startX := 1
 	if y == expectedHeight && x >= startX {
-		placeOfName := x >= startX && x < startX+len(name)
+		endX := startX + len(name) - 1
+		placeOfName := x >= startX && x <= endX
+		afterName := x > endX && x <= endX+2
+		beforeName := x < startX
 		if placeOfName && content != rune(name[x-startX]) {
 			t.Errorf("Expected '%s' to be printed here, but got '%s' at (%d, %d).", name, string(content), x, y)
 		}
-		if !placeOfName && content != '-' {
-			t.Fatalf("Expected rest of line to be filled with '-' but got '%s' at (%d, %d).", string(content), x, y)
+		if (afterName || beforeName) && content != '-' {
+			t.Fatalf("Expected line around the name to be filled with '-' but got '%s' at (%d, %d).", string(content), x, y)
 		}
 	}
 }
