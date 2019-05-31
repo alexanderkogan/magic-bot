@@ -104,6 +104,9 @@ func TestLifeTotalsOnScreen(t *testing.T) {
 			}
 		})
 	})
+
+	// TODO check overwriting of name
+	// TODO fix bug, that lifetotal not showing on narrow screens
 }
 
 func checkLifeTotal(t *testing.T, x, y int, lifeTotal string, expectedHeight, width int, content rune) {
