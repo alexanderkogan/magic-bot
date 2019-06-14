@@ -112,16 +112,18 @@ func TestLifeTotalsOnScreen(t *testing.T) {
 func checkLifeTotal(t *testing.T, x, y int, lifeTotal string, expectedHeight, width int, content rune) {
 	lifeTotalLen := getLifeLen(lifeTotal)
 	startX, endX := getStartEndForLife(width, lifeTotalLen)
-	if y == expectedHeight && x >= startX {
+	if y == expectedHeight && x >= startX-2 {
 		placeOfLife := x >= startX && x <= endX
 		beforeLife := x >= startX-2 && x < startX
 		afterLife := x > endX+1
 
-		livingPlayerOK := lifeTotal != deadPlayer && content != rune(lifeTotal[x-startX])
-		deadPlayerOK := lifeTotal == deadPlayer && content != deadPlayerRune
+		if placeOfLife {
+			livingPlayerOK := lifeTotal == deadPlayer || content == rune(lifeTotal[x-startX])
+			deadPlayerOK := lifeTotal != deadPlayer || content == deadPlayerRune
 
-		if placeOfLife && livingPlayerOK && deadPlayerOK {
-			t.Errorf("Expected '%s' to be printed here, but got '%s' at (%d, %d).", lifeTotal, string(content), x, y)
+			if !livingPlayerOK || !deadPlayerOK {
+				t.Errorf("Expected '%s' to be printed here, but got '%s' at (%d, %d).", lifeTotal, string(content), x, y)
+			}
 		}
 		if (beforeLife || afterLife) && content != '-' {
 			t.Fatalf("Expected line around the life total to be filled with '-' but got '%s' at (%d, %d).", string(content), x, y)
