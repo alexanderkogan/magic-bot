@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/alexanderkogan/magic-bot/backend"
+	"github.com/alexanderkogan/magic-bot/backend/rpc"
 	"github.com/alexanderkogan/magic-bot/battlefield"
 	"github.com/alexanderkogan/magic-bot/commands"
 	"github.com/alexanderkogan/magic-bot/tui"
@@ -13,7 +14,7 @@ import (
 
 func main() {
 	quitMessage := make(chan struct{})
-	srv := &backend.MockServer{}
+	srv := rpc.NewMagicServer("localhost:42586")
 	e := tui.Screen(
 		50,
 		func(key tcell.EventKey) {
