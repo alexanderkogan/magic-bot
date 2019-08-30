@@ -22,6 +22,9 @@ func addTotalOnLine(total int, line string) string {
 	if len(line) <= len(totalString) {
 		return line
 	}
+	if len(line)-2 > len(totalString) {
+		totalString = surroundLifeTotalWithBrackets(totalString)
+	}
 	indent := line[:len(line)-len(totalString)-1]
 	return indent + totalString + line[len(line)-1:]
 }
@@ -39,4 +42,8 @@ func handleDeadPlayer(line string) string {
 		return deadPlayer + line[1:]
 	}
 	return line[:len(line)-2] + deadPlayer + line[len(line)-1:]
+}
+
+func surroundLifeTotalWithBrackets(lifeTotal string) string {
+	return "|" + lifeTotal + "|"
 }

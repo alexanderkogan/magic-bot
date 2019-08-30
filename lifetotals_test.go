@@ -58,7 +58,7 @@ func TestAddLifeTotals(t *testing.T) {
 	t.Run("line continuation", func(t *testing.T) {
 		line1, line2, line3 := "----------", "..........", ",,,,,,,,,,"
 		you, enemy := 20, 120
-		expect := []string{"------" + strconv.Itoa(enemy) + "-", line2, ",,,,,,," + strconv.Itoa(you) + ","}
+		expect := []string{"----|" + strconv.Itoa(enemy) + "|-", line2, ",,,,,|" + strconv.Itoa(you) + "|,"}
 		got := addLifeTotals(you, enemy, []string{line1, line2, line3})
 		if len(got) != 3 || got[0] != expect[0] || got[1] != expect[1] || got[2] != expect[2] {
 			t.Fatalf("Expected life totals to be added to the right of the line "+
@@ -80,8 +80,8 @@ func TestLifeTotalsOnScreen(t *testing.T) {
 			for position1D, cell := range screenContent {
 				x, y := position1DTo2D(position1D, width)
 				requireOneRune(t, cell.Runes, x, y)
-				checkLifeTotal(t, x, y, strconv.Itoa(you.LifeTotal), youHeight, width, cell.Runes[0])
-				checkLifeTotal(t, x, y, strconv.Itoa(enemy.LifeTotal), enemyHeight, width, cell.Runes[0])
+				checkLifeTotal(t, x, y, surroundLifeTotalWithBrackets(strconv.Itoa(you.LifeTotal)), youHeight, width, cell.Runes[0])
+				checkLifeTotal(t, x, y, surroundLifeTotalWithBrackets(strconv.Itoa(enemy.LifeTotal)), enemyHeight, width, cell.Runes[0])
 			}
 		})
 	})
