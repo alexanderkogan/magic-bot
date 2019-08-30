@@ -28,6 +28,15 @@ func (srv *MockServer) NewGame(init NewGameRequest) Battlefield {
 	return srv.battlefield
 }
 
+func (srv MockServer) GameStarted() bool {
+	return srv.battlefield.You.Name != ""
+}
+
 func (srv MockServer) BattlefieldState() Battlefield {
 	return srv.battlefield
+}
+
+func (srv *MockServer) OverwritePlayerLifeTotal(you, enemy int) {
+	srv.battlefield.You.LifeTotal = you
+	srv.battlefield.Enemy.LifeTotal = enemy
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/alexanderkogan/magic-bot/backend"
 	"github.com/alexanderkogan/magic-bot/battlefield"
@@ -17,6 +18,8 @@ func main() {
 		50,
 		func(key tcell.EventKey) {
 			switch commands.Handle(key) {
+			case commands.NewGame:
+				srv.NewGame(backend.NewGameRequest{})
 			case commands.Quit:
 				close(quitMessage)
 			}
@@ -33,17 +36,38 @@ func mainLoop(srv backend.Server) func(tcell.Screen) {
 	return func(s tcell.Screen) {
 		s.Sync()
 		width, height := s.Size()
-		lines := getLines(srv.BattlefieldState(), width, height)
+		lines := getLines(srv, width, height)
 		drawScreen(s, lines)
 	}
 }
 
-func getLines(field backend.Battlefield, width, height int) []string {
+func getLines(srv backend.Server, width, height int) []string {
+	field := srv.BattlefieldState()
 	coms := commands.Commands(width)
+	battlefieldLines := battlefield.Battlefield(width, height-len(coms))
+	if srv.GameStarted() {
+		battlefieldLines = addPlayerNames(field.You.Name, field.Enemy.Name, battlefieldLines)
+		battlefieldLines = addLifeTotals(field.You.LifeTotal, field.Enemy.LifeTotal, battlefieldLines)
+	}
+	battlefieldLines[len(battlefieldLines)/2] = newGameAlertWithIndent(field, width)
+
 	return append(
-		battlefield.Battlefield(width, height-len(coms)),
+		battlefieldLines,
 		coms...,
 	)
+}
+
+// TODO this is a hack for having a temporary trigger and will be removed
+func newGameAlertWithIndent(field backend.Battlefield, width int) string {
+	if field.You.Name != "" {
+		newGameMsg := "New Game started"
+		indent := width/2 - len(newGameMsg)/2
+		if indent < 0 {
+			indent = 0
+		}
+		return strings.Repeat(" ", indent) + newGameMsg
+	}
+	return ""
 }
 
 func drawScreen(s tcell.Screen, lines []string) {

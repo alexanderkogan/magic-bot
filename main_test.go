@@ -1,25 +1,12 @@
 package main
 
 import (
-	"math"
 	"strconv"
 	"testing"
 
 	"github.com/alexanderkogan/magic-bot/backend"
 	"github.com/gdamore/tcell"
 )
-
-func withTestScreen(t *testing.T, test func(tcell.SimulationScreen)) {
-	s := tcell.NewSimulationScreen("")
-	if s == nil {
-		t.Fatalf("Failed to get simulation screen")
-	}
-	defer s.Fini()
-	if e := s.Init(); e != nil {
-		t.Fatalf("Failed to initialize screen: %v", e)
-	}
-	test(s)
-}
 
 func TestMainLoop(t *testing.T) {
 	t.Run("first screen", func(t *testing.T) {
@@ -36,12 +23,31 @@ func TestMainLoop(t *testing.T) {
 			}
 		})
 	})
-}
 
-func requireOneRune(t *testing.T, runes []rune, x, y int) {
-	if len(runes) > 1 {
-		t.Fatalf("Unexpected number of runes in %d, %d: %v", x, y, runes)
-	}
+	t.Run("new game hacky", func(t *testing.T) {
+		withTestScreen(t, func(screen tcell.SimulationScreen) {
+			srv := &backend.MockServer{}
+			srv.NewGame(backend.NewGameRequest{})
+			mainLoop(srv)(screen)
+
+			newGameAlertSnapshot := []rune("New Game started")
+			screenContent, width, height := screen.GetContents()
+			indent := width/2 - len(newGameAlertSnapshot)/2
+
+			for position1D, cell := range screenContent {
+				x, y := position1DTo2D(position1D, width)
+				requireOneRune(t, cell.Runes, x, y)
+
+				content := cell.Runes[0]
+				if y == height/2 && x >= indent && x < indent+len(newGameAlertSnapshot) {
+					if content != rune(newGameAlertSnapshot[x-indent]) {
+						t.Fatal(x, y, content)
+					}
+				}
+			}
+		})
+	})
+
 }
 
 func checkUpperBorder(t *testing.T, x, y int, content rune) {
@@ -61,7 +67,7 @@ func checkLowerBorder(t *testing.T, x, y, height int, content rune) {
 }
 
 func checkCommandLine(t *testing.T, x, y, height int, content rune) {
-	var commandLineSnapshot = []rune("n: New Game - l: Lifepoints - q: Quit")
+	commandLineSnapshot := []rune("n: New Game - l: Lifepoints - q: Quit")
 
 	if y == height-1 {
 		restOfLine := x >= len(commandLineSnapshot)
@@ -74,18 +80,12 @@ func checkCommandLine(t *testing.T, x, y, height int, content rune) {
 	}
 }
 
-func position1DTo2D(pos, width int) (x int, y int) {
-	x = pos % width
-	y = int(math.Floor(float64(pos) / float64(width)))
-	return
-}
-
 func TestGetLines(t *testing.T) {
 	t.Run("lines should fill screen", func(t *testing.T) {
 		withTestScreen(t, func(s tcell.SimulationScreen) {
-			noBackend := backend.Battlefield{}
+			noBackend := backend.MockServer{}
 			width, height := s.Size()
-			lines := getLines(noBackend, width, height)
+			lines := getLines(&noBackend, width, height)
 			if len(lines) < height {
 				t.Fatalf("Expected %d lines but got %d.", height, len(lines))
 			}
