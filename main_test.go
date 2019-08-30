@@ -24,7 +24,6 @@ func TestMainLoop(t *testing.T) {
 		})
 	})
 
-	// TODO show life totals
 	t.Run("new game hacky", func(t *testing.T) {
 		withTestScreen(t, func(screen tcell.SimulationScreen) {
 			srv := &backend.MockServer{}
