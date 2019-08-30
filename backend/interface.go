@@ -5,11 +5,6 @@ type NewGameRequest struct {
 	Enemy Player
 }
 
-type Battlefield struct {
-	You   Player
-	Enemy Player
-	Zone  Zones
-}
 type Zones struct {
 	Battlefield BattlefieldZone
 }

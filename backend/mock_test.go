@@ -1,6 +1,8 @@
 package backend
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestNewGame(t *testing.T) {
 	t.Run("empty init", func(t *testing.T) {
@@ -10,7 +12,7 @@ func TestNewGame(t *testing.T) {
 			You:   Player{Name: "Liliana Vess", LifeTotal: 20},
 			Enemy: Player{Name: "Chandra Nalaar", LifeTotal: 20},
 		}
-		if battlefield != expect {
+		if !battlefield.Equal(expect) {
 			t.Fatalf("Expected the battlefield to be the default one, but got\n%#v", battlefield)
 		}
 	})
@@ -85,7 +87,7 @@ func TestBattlefieldState(t *testing.T) {
 		enemy := Player{Name: "Sorin", LifeTotal: 22}
 		expect := srv.NewGame(NewGameRequest{You: you, Enemy: enemy})
 		battlefield := srv.BattlefieldState()
-		if expect != battlefield {
+		if !battlefield.Equal(expect) {
 			t.Fatalf("Expected the battlefield to stay\n%#v\nbut got\n%#v", expect, battlefield)
 		}
 	})
