@@ -32,6 +32,13 @@ func printToConsole(output []string) {
 }
 
 func TestHandler(t *testing.T) {
+	t.Run("should start new game on n", func(t *testing.T) {
+		got := Handle(*tcell.NewEventKey(tcell.KeyRune, 'n', tcell.ModNone))
+		if got != NewGame {
+			t.Fatalf("Expected to get a new game command (%d), but got %d.", NewGame, got)
+		}
+	})
+
 	t.Run("should quit on q", func(t *testing.T) {
 		got := Handle(*tcell.NewEventKey(tcell.KeyRune, 'q', tcell.ModNone))
 		if got != Quit {

@@ -51,9 +51,6 @@ func Handle(key tcell.EventKey) Command {
 		case 'n':
 			return NewGame
 		}
-	case tcell.KeyEscape, tcell.KeyEnter:
-		return Quit
 	}
-
 	return Nothing
 }
