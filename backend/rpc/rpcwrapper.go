@@ -31,6 +31,13 @@ func (srv MagicServer) NewGame(args backend.NewGameRequest) (reply backend.Battl
 	return reply
 }
 
+func (srv MagicServer) GameStarted() (reply bool) {
+	if err := srv.Client.Call("Server.GameStarted", backend.EmptyRequest{}, &reply); err != nil {
+		panic(fmt.Sprintf("GameStarted: %s", err))
+	}
+	return
+}
+
 func (srv MagicServer) BattlefieldState() (reply backend.Battlefield) {
 	if err := srv.Client.Call("Server.BattlefieldState", backend.EmptyRequest{}, &reply); err != nil {
 		panic(fmt.Sprintf("BattlefieldState: %s", err))

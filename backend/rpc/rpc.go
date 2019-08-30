@@ -20,6 +20,11 @@ func (srv *Server) NewGame(request backend.NewGameRequest, response *backend.Bat
 	return nil
 }
 
+func (srv Server) GameStarted(_ backend.EmptyRequest, response *bool) error {
+	*response = srv.Implementation.GameStarted()
+	return nil
+}
+
 func (srv Server) BattlefieldState(_ backend.EmptyRequest, response *backend.Battlefield) error {
 	battlefield := srv.Implementation.BattlefieldState()
 	*response = battlefield
