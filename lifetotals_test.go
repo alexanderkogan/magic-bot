@@ -105,11 +105,56 @@ func TestLifeTotalsOnScreen(t *testing.T) {
 		})
 	})
 
-	// TODO check overwriting of name
-	// TODO fix bug, that lifetotal not showing on narrow screens
+	t.Run("should move life totals up, if command takes multiple lines", func(t *testing.T) {
+		withTestScreenOfSize(t, 14, 25, func(screen tcell.SimulationScreen) {
+			srv := &backend.MockServer{}
+			you := backend.Player{Name: "You", LifeTotal: 20}
+			srv.NewGame(backend.NewGameRequest{You: you})
+			mainLoop(srv)(screen)
+
+			screenContent, width, height := screen.GetContents()
+			youLife := surroundLifeTotalWithBrackets(strconv.Itoa(you.LifeTotal))
+			youHeight := height - 4 // FIXME This only passes with 5 for width<14. See (https://github.com/alexanderkogan/magic-bot/issues/8)
+			for position1D, cell := range screenContent {
+				x, y := position1DTo2D(position1D, width)
+				requireOneRune(t, cell.Runes, x, y)
+				checkLifeTotal(t, x, y, youLife, youHeight, width, cell.Runes[0])
+			}
+		})
+	})
+
+	t.Run("should overwrite character name", func(t *testing.T) {
+		withTestScreenOfSize(t, 20, 50, func(screen tcell.SimulationScreen) {
+			srv := &backend.MockServer{}
+			you, enemy := backend.Player{Name: "This is a very long player name", LifeTotal: 9}, backend.Player{Name: "This is an absurdly long player name", LifeTotal: 200}
+			srv.NewGame(backend.NewGameRequest{You: you, Enemy: enemy})
+			mainLoop(srv)(screen)
+
+			screenContent, width, height := screen.GetContents()
+			youLife := surroundLifeTotalWithBrackets(strconv.Itoa(you.LifeTotal))
+			youHeight := height - 4 // FIXME see above (issue #8)
+			for position1D, cell := range screenContent {
+				x, y := position1DTo2D(position1D, width)
+				//if y == youHeight {
+				//	print(string(cell.Runes[0]))
+				//}
+				requireOneRune(t, cell.Runes, x, y)
+				checkLifeTotalOverwrite(t, x, y, youLife, youHeight, width, cell.Runes[0])
+			}
+		})
+	})
 }
 
 func checkLifeTotal(t *testing.T, x, y int, lifeTotal string, expectedHeight, width int, content rune) {
+	checkLifeTotalWithSurroundings(t, x, y, lifeTotal, expectedHeight, width, content, true)
+	return
+}
+
+func checkLifeTotalOverwrite(t *testing.T, x, y int, lifeTotal string, expectedHeight, width int, content rune) {
+	checkLifeTotalWithSurroundings(t, x, y, lifeTotal, expectedHeight, width, content, false)
+}
+
+func checkLifeTotalWithSurroundings(t *testing.T, x, y int, lifeTotal string, expectedHeight, width int, content rune, withSurroundings bool) {
 	lifeTotalLen := getLifeLen(lifeTotal)
 	startX, endX := getStartEndForLife(width, lifeTotalLen)
 	if y == expectedHeight && x >= startX-2 {
@@ -125,7 +170,7 @@ func checkLifeTotal(t *testing.T, x, y int, lifeTotal string, expectedHeight, wi
 				t.Errorf("Expected '%s' to be printed here, but got '%s' at (%d, %d).", lifeTotal, string(content), x, y)
 			}
 		}
-		if (beforeLife || afterLife) && content != '-' {
+		if withSurroundings && (beforeLife || afterLife) && content != '-' {
 			t.Fatalf("Expected line around the life total to be filled with '-' but got '%s' at (%d, %d).", string(content), x, y)
 		}
 	}

@@ -16,7 +16,11 @@ func addNameOnLine(name string, line string) string {
 		if nameFitsOnLine {
 			restOfLine = line[1+len(name):]
 		}
-		return line[:1] + name + restOfLine
+		nameToPrint := name
+		if len(name)+1 > len(line) {
+			nameToPrint = name[:len(line)-1]
+		}
+		return line[:1] + nameToPrint + restOfLine
 	}
 	return line
 }
